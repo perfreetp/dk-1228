@@ -1,0 +1,105 @@
+import type { Activity, Channel } from '@/types';
+
+const channels: Channel[] = [
+  { id: 'c1', name: '微信公众号', type: 'wechat', cost: 15000, registrations: 520, checkIns: 380, leads: 85, deals: 22 },
+  { id: 'c2', name: '微博推广', type: 'weibo', cost: 8000, registrations: 280, checkIns: 195, leads: 42, deals: 11 },
+  { id: 'c3', name: '邮件营销', type: 'email', cost: 3000, registrations: 150, checkIns: 120, leads: 28, deals: 7 },
+  { id: 'c4', name: '短信通知', type: 'sms', cost: 5000, registrations: 200, checkIns: 165, leads: 35, deals: 9 },
+  { id: 'c5', name: '信息流广告', type: 'ads', cost: 25000, registrations: 680, checkIns: 450, leads: 120, deals: 35 },
+  { id: 'c6', name: '线下推广', type: 'offline', cost: 12000, registrations: 320, checkIns: 290, leads: 65, deals: 18 },
+];
+
+export const activities: Activity[] = [
+  {
+    id: 'a1',
+    name: '2026春季新品发布会',
+    type: 'launch',
+    startDate: '2026-03-15',
+    endDate: '2026-03-15',
+    target: {
+      registrations: 2000,
+      checkIns: 1500,
+      leads: 300,
+      deals: 80,
+    },
+    budget: 150000,
+    channels: channels,
+    metrics: {
+      registrations: 2150,
+      checkIns: 1600,
+      viewers: 1450,
+      interactions: 890,
+      leads: 375,
+      deals: 102,
+      dealAmount: 5280000,
+    },
+    createdAt: '2026-02-01',
+    updatedAt: '2026-03-16',
+  },
+  {
+    id: 'a2',
+    name: '2026数字营销峰会',
+    type: 'exhibition',
+    startDate: '2026-04-20',
+    endDate: '2026-04-22',
+    target: {
+      registrations: 1500,
+      checkIns: 1200,
+      leads: 250,
+      deals: 60,
+    },
+    budget: 200000,
+    channels: channels.map(c => ({
+      ...c,
+      registrations: Math.floor(c.registrations * 0.7),
+      checkIns: Math.floor(c.checkIns * 0.7),
+      leads: Math.floor(c.leads * 0.7),
+      deals: Math.floor(c.deals * 0.7),
+    })),
+    metrics: {
+      registrations: 1580,
+      checkIns: 1280,
+      viewers: 1150,
+      interactions: 720,
+      leads: 285,
+      deals: 78,
+      dealAmount: 3850000,
+    },
+    createdAt: '2026-03-01',
+    updatedAt: '2026-04-23',
+  },
+  {
+    id: 'a3',
+    name: '产品直播培训',
+    type: 'livestream',
+    startDate: '2026-05-10',
+    endDate: '2026-05-10',
+    target: {
+      registrations: 3000,
+      checkIns: 2500,
+      leads: 400,
+      deals: 100,
+    },
+    budget: 50000,
+    channels: channels.slice(0, 4).map(c => ({
+      ...c,
+      registrations: Math.floor(c.registrations * 1.2),
+      checkIns: Math.floor(c.checkIns * 1.2),
+      leads: Math.floor(c.leads * 1.2),
+      deals: Math.floor(c.deals * 1.2),
+    })),
+    metrics: {
+      registrations: 3280,
+      checkIns: 2680,
+      viewers: 2520,
+      interactions: 1680,
+      leads: 420,
+      deals: 115,
+      dealAmount: 2100000,
+    },
+    createdAt: '2026-04-15',
+    updatedAt: '2026-05-11',
+  },
+];
+
+export const currentActivity = activities[0];
