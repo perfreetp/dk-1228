@@ -6,7 +6,7 @@ interface AttendeeState {
   attendees: Attendee[];
   filteredAttendees: Attendee[];
   filters: AttendeeFilters;
-  setFilters: (filters: AttendeeFilters) => void;
+  setFilters: (filters: Partial<AttendeeFilters>) => void;
   clearFilters: () => void;
 }
 
@@ -40,10 +40,19 @@ export const useAttendeeStore = create<AttendeeState>((set) => ({
   attendees: attendees,
   filteredAttendees: attendees,
   filters: defaultFilters,
-  setFilters: (filters: AttendeeFilters) => set((state) => ({
-    filters: { ...state.filters, ...filters },
-    filteredAttendees: applyFilters(state.attendees, { ...state.filters, ...filters }),
-  })),
+  setFilters: (newFilters: Partial<AttendeeFilters>) => set((state) => {
+    const updatedFilters = { ...state.filters, ...newFilters };
+    const definedFilters: AttendeeFilters = {};
+    Object.entries(updatedFilters).forEach(([key, value]) => {
+      if (value !== undefined && (Array.isArray(value) ? value.length > 0 : true)) {
+        (definedFilters as any)[key] = value;
+      }
+    });
+    return {
+      filters: definedFilters,
+      filteredAttendees: applyFilters(state.attendees, definedFilters),
+    };
+  }),
   clearFilters: () => set({
     filters: defaultFilters,
     filteredAttendees: attendees,

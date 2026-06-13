@@ -1,16 +1,16 @@
 import { cn } from '@/lib/utils';
-import { Search } from 'lucide-react';
 
 interface InputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  type?: 'text' | 'search';
+  type?: 'text' | 'search' | 'date' | 'number';
   className?: string;
   icon?: React.ReactNode;
+  onBlur?: () => void;
 }
 
-export default function Input({ value, onChange, placeholder, type = 'text', className, icon }: InputProps) {
+export default function Input({ value, onChange, placeholder, type = 'text', className, icon, onBlur }: InputProps) {
   return (
     <div className={cn('relative', className)}>
       {icon && (
@@ -23,6 +23,7 @@ export default function Input({ value, onChange, placeholder, type = 'text', cla
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        onBlur={onBlur}
         className={cn(
           'w-full bg-[#2a4a6a]/20 border border-[#2a4a6a]/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#6a8aaa] focus:outline-none focus:border-[#ff6b35]/50 focus:bg-[#2a4a6a]/30 transition-all',
           icon && 'pl-10'

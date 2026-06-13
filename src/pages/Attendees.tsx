@@ -7,7 +7,7 @@ import { formatDuration, formatCurrency } from '@/utils/format';
 import { exportToCSV } from '@/utils/export';
 import { Search, Download, X, Users, Building, MapPin, Tag, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { CustomerLevel, AttendeeStatus } from '@/types';
 
 const statusLabels: Record<AttendeeStatus, string> = {
@@ -49,7 +49,7 @@ const industries = ['互联网', '金融', '制造业', '零售', '教育', '医
 const channels = ['微信公众号', '微博推广', '邮件营销', '短信通知', '信息流广告', '线下推广'];
 
 export default function Attendees() {
-  const { filteredAttendees, filters, setFilters, clearFilters } = useAttendeeStore();
+  const { filteredAttendees, setFilters, clearFilters } = useAttendeeStore();
   const [search, setSearch] = useState('');
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
@@ -62,6 +62,17 @@ export default function Attendees() {
   const handleSearch = (value: string) => {
     setSearch(value);
     setFilters({ search: value });
+  };
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setSelectedCities([]);
+    setSelectedIndustries([]);
+    setSelectedLevels([]);
+    setSelectedStatuses([]);
+    setSelectedChannels([]);
+    setCurrentPage(1);
+    clearFilters();
   };
 
   const toggleCityFilter = (city: string) => {
@@ -103,6 +114,15 @@ export default function Attendees() {
     setSelectedChannels(newSelected);
     setFilters({ channels: newSelected.length > 0 ? newSelected : undefined });
   };
+
+  useEffect(() => {
+    const totalPages = Math.ceil(filteredAttendees.length / pageSize);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(Math.max(1, totalPages));
+    } else if (filteredAttendees.length === 0) {
+      setCurrentPage(1);
+    }
+  }, [filteredAttendees.length]);
 
   const handleExport = () => {
     const exportData = filteredAttendees.map((a) => ({
@@ -176,7 +196,7 @@ export default function Attendees() {
         </Card>
       </div>
 
-      <Card title="筛选条件" action={hasFilters && <Button variant="ghost" size="sm" onClick={clearFilters} icon={<X className="w-4 h-4" />}>清除筛选</Button>}>
+      <Card title="筛选条件" action={hasFilters && <Button variant="ghost" size="sm" onClick={handleClearFilters} icon={<X className="w-4 h-4" />}>清除筛选</Button>}>
         <div className="space-y-4">
           <Input
             value={search}
@@ -305,41 +325,63 @@ export default function Attendees() {
               </tr>
             </thead>
             <tbody>
-              {paginatedAttendees.map((attendee) => (
-                <tr key={attendee.id} className="border-b border-[#2a4a6a]/20 hover:bg-[#2a4a6a]/10 transition-colors">
-                  <td className="py-3 px-4 text-sm font-medium text-white">{attendee.name}</td>
-                  <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.company}</td>
-                  <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.industry}</td>
-                  <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.city}</td>
-                  <td className="py-3 px-4">
-                    <span className={cn('px-2 py-0.5 rounded-lg text-xs', levelColors[attendee.customerLevel])}>
-                      {levelLabels[attendee.customerLevel]}
-                    </span>
+              {paginatedAttendees.length > 0 ? (
+                paginatedAttendees.map((attendee) => (
+                  <tr key={attendee.id} className="border-b border-[#2a4a6a]/20 hover:bg-[#2a4a6a]/10 transition-colors">
+                    <td className="py-3 px-4 text-sm font-medium text-white">{attendee.name}</td>
+                    <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.company}</td>
+                    <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.industry}</td>
+                    <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.city}</td>
+                    <td className="py-3 px-4">
+                      <span className={cn('px-2 py-0.5 rounded-lg text-xs', levelColors[attendee.customerLevel])}>
+                        {levelLabels[attendee.customerLevel]}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={cn('px-2 py-0.5 rounded-lg text-xs', statusColors[attendee.status])}>
+                        {statusLabels[attendee.status]}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-sm text-white tabular-nums">{formatDuration(attendee.watchDuration)}</td>
+                    <td className="py-3 px-4 text-right text-sm text-white tabular-nums">{attendee.interactions}</td>
+                    <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.channel}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={9} className="py-12 text-center text-[#6a8aaa]">
+                    暂无符合条件的参会人
                   </td>
-                  <td className="py-3 px-4">
-                    <span className={cn('px-2 py-0.5 rounded-lg text-xs', statusColors[attendee.status])}>
-                      {statusLabels[attendee.status]}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right text-sm text-white tabular-nums">{formatDuration(attendee.watchDuration)}</td>
-                  <td className="py-3 px-4 text-right text-sm text-white tabular-nums">{attendee.interactions}</td>
-                  <td className="py-3 px-4 text-sm text-[#6a8aaa]">{attendee.channel}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#2a4a6a]/30">
           <p className="text-sm text-[#6a8aaa]">
-            显示 {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, filteredAttendees.length)} 条，共 {filteredAttendees.length} 条
+            {filteredAttendees.length > 0
+              ? `显示 ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredAttendees.length)} 条，共 ${filteredAttendees.length} 条`
+              : `共 ${filteredAttendees.length} 条`}
           </p>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1 || totalPages === 0}
+            >
               上一页
             </Button>
-            <span className="text-sm text-white">{currentPage} / {totalPages}</span>
-            <Button variant="ghost" size="sm" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>
+            <span className="text-sm text-white">
+              {totalPages > 0 ? `${currentPage} / ${totalPages}` : '0 / 0'}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage >= totalPages || totalPages === 0}
+            >
               下一页
             </Button>
           </div>

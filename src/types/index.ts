@@ -69,10 +69,12 @@ export interface Attendee {
   feedback?: Feedback;
 }
 
+export type ReportSectionType = 'metrics' | 'channel' | 'funnel' | 'survey' | 'notes';
+
 export interface ReportSection {
-  type: 'metrics' | 'chart' | 'table' | 'text';
+  type: ReportSectionType;
   title: string;
-  data: unknown;
+  enabled: boolean;
 }
 
 export interface ReportNote {
